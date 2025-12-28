@@ -202,6 +202,35 @@
         @test (dA - dD) isa typ
         @test (dD - dA) isa typ
     end
+
+    @testset "Scalar multiplication with Adjoint/Transpose ($elty)" for elty in (
+        Float32, Float64, ComplexF32, ComplexF64,
+    )
+        N = 10
+        a = rand(real(elty))
+        S = sprand(elty, N, N, 0.5)
+        dS = ROCSparseMatrixCSC(S)
+
+        # Test a * M'
+        result = a * dS'
+        expected = a * S'
+        @test Array(result) ≈ expected
+
+        # Test M' * a
+        result = dS' * a
+        expected = S' * a
+        @test Array(result) ≈ expected
+
+        # Test a * transpose(M)
+        result = a * transpose(dS)
+        expected = a * transpose(S)
+        @test Array(result) ≈ expected
+
+        # Test transpose(M) * a
+        result = transpose(dS) * a
+        expected = transpose(S) * a
+        @test Array(result) ≈ expected
+    end
 end
 
 @testset "SparseArrays.jl" begin

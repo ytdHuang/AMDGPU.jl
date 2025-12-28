@@ -244,3 +244,15 @@ for SparseMatrixType in [:ROCSparseMatrixCSC, :ROCSparseMatrixCSR], op in [:(+),
 end
 
 # TODO _sptranspose / _spadjoint
+
+## scalar multiplication with Adjoint/Transpose wrapped sparse matrices
+
+# scalar * Adjoint/Transpose -> materialize and broadcast
+for wrapper in (:Adjoint, :Transpose)
+    for SparseMatrixType in [:ROCSparseMatrixCSC, :ROCSparseMatrixCSR, :ROCSparseMatrixCOO, :ROCSparseMatrixBSR]
+        @eval begin
+            Base.:(*)(x::Number, A::$wrapper{T, <:$SparseMatrixType{T}}) where {T} = x .* A
+            Base.:(*)(A::$wrapper{T, <:$SparseMatrixType{T}}, x::Number) where {T} = A .* x
+        end
+    end
+end
